@@ -22,6 +22,11 @@ spring:
   jackson:
     time-zone: Asia/Seoul
 
+springdoc:
+  swagger-ui:
+    operations-sorter: method
+    tags-sorter: alpha
+
 logging:
   level:
     org.hibernate.SQL: debug

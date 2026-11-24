@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -52,6 +53,13 @@ public class ApiExceptionAdvice {
         ErrorCode code = ErrorCode.VALIDATION_ERROR;
         return ResponseEntity.status(code.getStatus())
                 .body(new ApiError(code.name(), code.getMessage(), fieldErrors));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handlerResourceNotFound() {
+        ErrorCode code = ErrorCode.RESOURCE_NOT_FOUND;
+        return ResponseEntity.status(code.getStatus())
+                .body(new ApiError(code.name(), code.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

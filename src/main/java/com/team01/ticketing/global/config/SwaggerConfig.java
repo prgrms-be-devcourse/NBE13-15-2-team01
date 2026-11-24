@@ -1,4 +1,4 @@
-package com.team01.ticketing.config;
+package com.team01.ticketing.global.config;
 
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;

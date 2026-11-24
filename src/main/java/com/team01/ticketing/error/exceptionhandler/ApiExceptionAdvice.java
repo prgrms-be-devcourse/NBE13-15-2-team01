@@ -7,12 +7,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,7 +37,6 @@ public class ApiExceptionAdvice {
             MethodArgumentTypeMismatchException.class,
             HandlerMethodValidationException.class
     })
-    //잘못된 요청 예외 4개를 한꺼번에 400으로 바꿔 주는 핸들러
     public ResponseEntity<ApiError> handlerValidationError() {
         ErrorCode code = ErrorCode.VALIDATION_ERROR;
         return ResponseEntity.status(code.getStatus())
@@ -42,7 +44,6 @@ public class ApiExceptionAdvice {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    // DTO로 받을 때 건 검증이 실패했을 때 동작하는 핸들러
     public ResponseEntity<ApiError> handlerBodyValidationError(MethodArgumentNotValidException e) {
         Map<String, String> fieldErrors = new LinkedHashMap<>();
         for (FieldError error : e.getBindingResult().getFieldErrors()) {
@@ -52,6 +53,25 @@ public class ApiExceptionAdvice {
         ErrorCode code = ErrorCode.VALIDATION_ERROR;
         return ResponseEntity.status(code.getStatus())
                 .body(new ApiError(code.name(), code.getMessage(), fieldErrors));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handlerResourceNotFound() {
+        ErrorCode code = ErrorCode.RESOURCE_NOT_FOUND;
+        return ResponseEntity.status(code.getStatus())
+                .body(new ApiError(code.name(), code.getMessage()));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiError> handlerMethodNotAllowed() {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(new ApiError("METHOD_NOT_ALLOWED", "지원하지 않는 요청 방식입니다."));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiError> handlerUnsupportedMediaType() {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(new ApiError("UNSUPPORTED_MEDIA_TYPE", "지원하지 않는 요청 형식입니다."));
     }
 
     @ExceptionHandler(Exception.class)

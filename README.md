@@ -19,7 +19,7 @@ NBE13-15 2차 팀 프로젝트 (team01)
 | Language | Java 21 |
 | Framework | Spring Boot 4.1.2 |
 | Build | Gradle |
-| DB | MySQL 8 (Docker), 테스트는 H2 |
+| DB | MySQL 8 (Docker) |
 | ORM | Spring Data JPA (Hibernate) |
 | Security | Spring Security (BCrypt) |
 | API 문서 | springdoc-openapi 3.2.0 (Swagger UI) |
@@ -152,7 +152,7 @@ src/main/java/com/team01/ticketing
 
 - `main`: 최종본
 - `dev`: 개발 통합 브랜치
-- `feature/<작업명>`: 기능 개발 (예: `feature/infra-main`)
+- `<<작업명>- main>`: 기능 개발 (예: `infra-main`)
 
 `dev` 브랜치가 존재하므로 `dev/...` 형태의 브랜치 이름은 사용할 수 없습니다.
 
@@ -167,11 +167,17 @@ src/main/java/com/team01/ticketing
 - 컨트롤러에 `@Tag`, `@Operation`을 붙여 Swagger 문서를 작성합니다.
 - Pageable 파라미터에는 `@ParameterObject`를 붙입니다.
 
+### 공통 규칙
+
+공유 설정 파일(build.gradle, application.yml, schema.sql)은 직접 수정하지 말고 요청
+엔티티 추가·수정 시 schema.sql도 같은 PR에서 수정
+이미 있는 테이블의 구조 변경은 반영되지 않음 → 로컬에서 해당 테이블 삭제 후 재실행
+
 ## 팀원
 
 | 이름 | 담당 |
 |---|---|
-| A | 회원/인증 |
-| B | 공연/회차 |
-| C | 좌석/예매 |
+| 김지호 | 회원/인증 |
+| 이지원 | 공연/회차 |
+| 이제섭 | 좌석/예매 |
 | 맹주석 | 공통/인프라, 기획서·발표 총괄 |

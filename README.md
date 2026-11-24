@@ -128,9 +128,8 @@ Windows에서는 `gradlew.bat bootRun` 또는 IntelliJ에서 `TicketingApplicati
 
 ### 새 예외 추가 방법
 
-1. `error` 패키지에 `RuntimeException`을 상속한 클래스를 만들고 고정 메시지를 지정합니다.
-2. `ApiExceptionAdvice`에서 해당 상태 코드의 `@ExceptionHandler` 목록에 클래스를 추가합니다. 추가하지 않으면 500으로 응답됩니다.
-
+1. `error` 패키지에 `ErrorCode`안에 해당 코드를 추가합니다. 추가하지 않으면 500으로 응답됩니다.
+2.  직접 던지는 에러는 `BusinessException` 으로 던집니다. 
 ## 프로젝트 구조
 
 ```
@@ -158,7 +157,7 @@ src/main/java/com/team01/ticketing
 
 ### PR
 
-- `feature/*` 브랜치에서 `dev`로 PR을 보냅니다.
+- `<자신의 작업공간>` 브랜치에서 `dev`로 PR을 보냅니다.
 - 최소 1명의 리뷰를 받은 뒤 머지합니다.
 
 ### API 규칙
@@ -177,7 +176,7 @@ src/main/java/com/team01/ticketing
 
 | 이름 | 담당 |
 |---|---|
-| 김지호 | 회원/인증 |
-| 이지원 | 공연/회차 |
-| 이제섭 | 좌석/예매 |
-| 맹주석 | 공통/인프라, 기획서·발표 총괄 |
+| 이지원 | 회원/인증 |
+| 이제섭 | 공연/회차 |
+| 김지호 | 좌석/예매 |
+| 맹주석 | 공통/인프라, 기획서, 발표자료 |

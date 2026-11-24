@@ -30,3 +30,9 @@ springdoc:
 logging:
   level:
     org.hibernate.SQL: debug
+
+ticketing:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-seconds: 900       # 15분
+    refresh-seconds: 604800   # 7일

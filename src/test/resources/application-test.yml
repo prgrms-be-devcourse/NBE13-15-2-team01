@@ -4,6 +4,3 @@ spring:
   test:
     database:
       replace: none
-ticketing:
-  jwt:
-    secret: test-only-jwt-secret-do-not-use-in-production-0123456789

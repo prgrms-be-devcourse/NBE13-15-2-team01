@@ -1,6 +1,7 @@
 package com.team01.ticketing.member;
 
-import com.team01.ticketing.error.LOGIN_FAILED;
+import com.team01.ticketing.error.BusinessException;
+import com.team01.ticketing.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,7 +27,7 @@ public class PasswordAuthenticationService {
             || request.password() == null
             || request.password().isBlank()
             || request.password().getBytes(StandardCharsets.UTF_8).length > 72) {
-            throw new LOGIN_FAILED();
+            throw new BusinessException(ErrorCode.LOGIN_FAILED);
         }
         // 아직 인증되지 않은 입력값(이메일, 평문 비밀번호)을 Security 형식으로 감싸기
         Authentication input = UsernamePasswordAuthenticationToken.unauthenticated(request.email(), request.password());
@@ -37,7 +38,7 @@ public class PasswordAuthenticationService {
             return authenticationManager.authenticate(input).getName();
         // 회원 없음과 비밀번호 틀림을 같은 예외로 바꿔서 가입된 이메일인지 응답으로 알 수 없게 함.
         } catch (BadCredentialsException | UsernameNotFoundException ex) {
-            throw new LOGIN_FAILED();
+            throw new BusinessException(ErrorCode.LOGIN_FAILED);
         }
     }
 }

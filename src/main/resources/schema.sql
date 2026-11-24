@@ -46,14 +46,32 @@ CREATE TABLE IF NOT EXISTS reservation (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     member_id BIGINT NOT NULL,
     schedule_id BIGINT NOT NULL,
-    seat_id BIGINT NOT NULL,
-    active_seat_id BIGINT,
     status VARCHAR(20) NOT NULL,
     reserved_at DATETIME NOT NULL,
     canceled_at DATETIME,
-    KEY idx_reservation_member_schedule (member_id, schedule_id, status),
     CONSTRAINT fk_reservation_member FOREIGN KEY (member_id) REFERENCES member (id),
     CONSTRAINT fk_reservation_schedule FOREIGN KEY (schedule_id) REFERENCES schedule (id),
-    CONSTRAINT fk_reservation_seat FOREIGN KEY (seat_id) REFERENCES seat (id),
-    CONSTRAINT uk_reservation_active_seat UNIQUE (active_seat_id)
+    CONSTRAINT ck_reservation_status CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELED'))
+);
+
+CREATE TABLE IF NOT EXISTS reservation_seat (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    reservation_id BIGINT NOT NULL,
+    member_id BIGINT NOT NULL,
+    schedule_id BIGINT NOT NULL,
+    seat_id BIGINT NOT NULL,
+    active_seat_id BIGINT,
+    status VARCHAR(20) NOT NULL,
+    canceled_at DATETIME,
+    KEY idx_reservation_seat_member_schedule (member_id, schedule_id, status),
+    CONSTRAINT fk_reservation_seat_reservation FOREIGN KEY (reservation_id) REFERENCES reservation (id),
+    CONSTRAINT fk_reservation_seat_member FOREIGN KEY (member_id) REFERENCES member (id),
+    CONSTRAINT fk_reservation_seat_schedule FOREIGN KEY (schedule_id) REFERENCES schedule (id),
+    CONSTRAINT fk_reservation_seat_seat FOREIGN KEY (seat_id) REFERENCES seat (id),
+    CONSTRAINT uk_reservation_seat_active_seat UNIQUE (active_seat_id),
+    CONSTRAINT ck_reservation_seat_status CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELED')),
+    CONSTRAINT ck_reservation_seat_active CHECK (
+        (status = 'CANCELED' AND active_seat_id IS NULL)
+        OR (status <> 'CANCELED' AND active_seat_id = seat_id)
+    )
 );

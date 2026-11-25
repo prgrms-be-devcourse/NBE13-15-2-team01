@@ -32,6 +32,9 @@ logging:
     org.hibernate.SQL: debug
 
 ticketing:
+  kopis:
+    service-key: ${KOPIS_SERVICE_KEY:}
+    base-url: http://www.kopis.or.kr/openApi/restful
   jwt:
     secret: ${JWT_SECRET}
     access-seconds: 900       # 15분

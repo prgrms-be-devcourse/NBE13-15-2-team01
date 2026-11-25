@@ -1,7 +1,8 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.member.service;
 
 import com.team01.ticketing.error.BusinessException;
 import com.team01.ticketing.error.ErrorCode;
+import com.team01.ticketing.member.dto.LoginRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;

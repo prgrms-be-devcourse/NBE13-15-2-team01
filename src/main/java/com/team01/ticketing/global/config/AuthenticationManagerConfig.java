@@ -1,4 +1,4 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +14,7 @@ public class AuthenticationManagerConfig {
     // 이메일과 비밀번호 확인을 맡을 AuthenticationManager를 빈으로 등록
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
-        // DB에서 회원을 읽고(UserDetailsService) 비밀번호를 비교하는(PasswordEncoder) 기보 구현체
+        // DB에서 회원을 읽고(UserDetailsService) 비밀번호를 비교하는(PasswordEncoder) 기본 구현체
         // 회원이 없을 때도 가짜 비교를 수행해서 응답 시간으로 가입 여부를 알아내기 어렵게 함.
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
 

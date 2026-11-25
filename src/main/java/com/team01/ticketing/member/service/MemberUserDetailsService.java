@@ -1,5 +1,7 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.member.service;
 
+import com.team01.ticketing.member.entity.Member;
+import com.team01.ticketing.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

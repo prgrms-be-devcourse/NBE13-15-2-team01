@@ -1,4 +1,4 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.member.dto;
 
 public final class ValidationPatterns {
     // 이메일 정규식을 하나로 관리.

@@ -1,5 +1,6 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.member.repository;
 
+import com.team01.ticketing.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

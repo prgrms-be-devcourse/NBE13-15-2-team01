@@ -1,4 +1,4 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

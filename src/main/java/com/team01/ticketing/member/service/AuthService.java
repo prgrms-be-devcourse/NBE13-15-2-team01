@@ -1,7 +1,11 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.member.service;
 
 import com.team01.ticketing.error.BusinessException;
 import com.team01.ticketing.error.ErrorCode;
+import com.team01.ticketing.member.dto.MemberResponse;
+import com.team01.ticketing.member.dto.SignupRequest;
+import com.team01.ticketing.member.entity.Member;
+import com.team01.ticketing.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,7 +33,7 @@ public class AuthService {
             return MemberResponse.from(memberRepository.save(member));
 
         } catch (DataIntegrityViolationException ex) {
-            // 같은 이메증로 동시에 가입할 경우 1번 검사를 둘 다 통과할 수 있음.
+            // 같은 이메일로 동시에 가입할 경우 1번 검사를 둘 다 통과할 수 있음.
             // 이때 DB의 UNIQUE 제약이 두 번째 저장을 막고, 그 오류를 500 대신 409로 바꿈.
             throw new BusinessException(ErrorCode.EMAIL_DUPLICATED);
         }

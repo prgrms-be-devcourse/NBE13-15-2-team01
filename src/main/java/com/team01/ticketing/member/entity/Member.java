@@ -1,4 +1,4 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.member.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

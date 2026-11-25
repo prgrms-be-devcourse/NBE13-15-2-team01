@@ -1,5 +1,8 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.member.controller;
 
+import com.team01.ticketing.member.service.AuthService;
+import com.team01.ticketing.member.dto.MemberResponse;
+import com.team01.ticketing.member.dto.SignupRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,7 +20,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "회원가일")
+    @Operation(summary = "회원가입")
     public MemberResponse signup(@Valid @RequestBody SignupRequest request) {
         return authService.signup(request);
     }

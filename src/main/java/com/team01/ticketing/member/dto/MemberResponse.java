@@ -1,4 +1,7 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.member.dto;
+
+import com.team01.ticketing.member.entity.Member;
+import com.team01.ticketing.member.entity.Role;
 
 public record MemberResponse(Long id, String email, String name, Role role) {
 

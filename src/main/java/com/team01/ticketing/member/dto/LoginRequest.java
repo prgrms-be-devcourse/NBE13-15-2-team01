@@ -1,4 +1,4 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.member.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

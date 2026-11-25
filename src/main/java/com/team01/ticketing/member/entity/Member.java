@@ -1,4 +1,4 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.member.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -18,7 +18,7 @@ public class Member {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false, length = 50)

@@ -1,9 +1,8 @@
-package com.team01.ticketing.member;
+package com.team01.ticketing.member.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.executable.ValidateOnExecution;
 
 public record SignupRequest(
         @NotBlank(message = "이메일을 입력해 주세요.")

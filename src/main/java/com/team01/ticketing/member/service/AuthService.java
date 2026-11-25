@@ -3,11 +3,13 @@ package com.team01.ticketing.member.service;
 import com.team01.ticketing.error.BusinessException;
 import com.team01.ticketing.error.ErrorCode;
 import com.team01.ticketing.global.security.JwtService;
+import com.team01.ticketing.member.dto.IssuedTokens;
 import com.team01.ticketing.member.dto.LoginRequest;
 import com.team01.ticketing.member.dto.LoginResult;
 import com.team01.ticketing.member.dto.MemberResponse;
 import com.team01.ticketing.member.entity.Member;
 import com.team01.ticketing.member.repository.MemberRepository;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,5 +41,24 @@ public class AuthService {
         String refreshToken = jwtService.createRefresh(member.getId());
         // 4. 컨트롤러가 access와 회원 정보는 body로, refresh는 쿠키로 나눠서 보냄.
         return new LoginResult(accessToken, refreshToken, MemberResponse.from(member));
+    }
+
+    // 토큰 재발급 : refresh 토큰 검증 -> 회원 조회 -> access, refresh 토큰 재발급
+    @Transactional(readOnly = true)
+    public IssuedTokens reissue(String refreshToken) {
+        // 1. refresh 토큰 검증 (서명, 만료, 종류 확인)
+        // 쿠키가 없어서 null이 들어와도 parseRefresh가 UNAUTHORIZED(401)로 처리.
+        // access 토큰을 넣으면 tokenType이 달라서 401
+        Claims claims = jwtService.parseRefresh(refreshToken);
+        Long memberId = jwtService.getMemberId(claims);
+        // 2. 토큰은 유효해도 그 사이 회원이 삭제되었을 수 있으므로 DB에서 확인.
+        // role도 토큰이 아니라 DB의 최신 값을 사용.
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.UNAUTHORIZED));
+        // 3. access, refresh 토큰 모두 재발급
+        String newAccessToken = jwtService.createAccess(member.getId(), member.getRole());
+        String newRefreshToken = jwtService.createRefresh(member.getId());
+        // 4. 컨트롤러가 access는 body로, refresh는 쿠키로 나눠서 보냄.
+        return new IssuedTokens(newAccessToken, newRefreshToken);
     }
 }

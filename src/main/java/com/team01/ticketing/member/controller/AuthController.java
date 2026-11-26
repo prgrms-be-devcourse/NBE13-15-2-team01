@@ -1,9 +1,7 @@
 package com.team01.ticketing.member.controller;
 
 import com.team01.ticketing.global.security.JwtService;
-import com.team01.ticketing.member.dto.LoginRequest;
-import com.team01.ticketing.member.dto.LoginResponse;
-import com.team01.ticketing.member.dto.LoginResult;
+import com.team01.ticketing.member.dto.*;
 import com.team01.ticketing.member.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,12 +29,30 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "로그인")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request) {
         LoginResult result = authService.login(request);
         // 쿠키를 응답 헤더에 넣어야 해서 ResponseEntity를 사용
         // body(accessToken과 회원 정보), Set-Cookie 헤더(refreshToken)
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, refreshCookie(result.refreshToken()).toString()).body(result.toResponse());
+                .header(HttpHeaders.SET_COOKIE,
+                        refreshCookie(result.refreshToken()).toString())
+                .body(result.toResponse());
+    }
+
+    @PostMapping("/token/refresh")
+    @Operation(summary = "토큰 재발급")
+    public ResponseEntity<AccessTokenResponse> reissue(
+            // 브라우저가 자동으로 보내는 refresh 쿠키를 꺼냄.
+            // required = false : 쿠키가 없을 때 스프링 기본 400이 아니라, 서비스에서 우리 형식의 UNAUTHORIZED(401)로 응답하게 하려고.
+            @CookieValue(name = REFRESH_COOKIE_NAME, required = false) String refreshToken) {
+        IssuedTokens tokens = authService.reissue(refreshToken);
+        // 로그인과 같은 refreshCookie()로 쿠키를 새 refresh 토큰으로 덮어씀.
+        // body에는 새 access 토큰만 보냄.
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE,
+                        refreshCookie(tokens.refreshToken()).toString())
+                .body(tokens.toResponse());
     }
 
     // refresh 토큰을 담는 쿠키 생성 (재발급, 로그아웃에서도 재사용)

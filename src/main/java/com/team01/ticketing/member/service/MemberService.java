@@ -38,4 +38,12 @@ public class MemberService {
             throw new BusinessException(ErrorCode.EMAIL_DUPLICATED);
         }
     }
+
+    // 내 정보 조회 : 토큰에서 꺼낸 회원 id로 회원을 찾아 응답 DTO로 변환.
+    @Transactional(readOnly = true)
+    public MemberResponse getMe(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        return MemberResponse.from(member);
+    }
 }

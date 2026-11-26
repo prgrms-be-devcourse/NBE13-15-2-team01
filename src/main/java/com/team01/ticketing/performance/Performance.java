@@ -75,4 +75,22 @@ public class Performance {
     public LocalDate getEndDate() {
         return endDate;
     }
+
+    public static Performance ofKopis(String kopisId, String title, String genre, String posterUrl,
+                                      String venueName, LocalDate startDate, LocalDate endDate) {
+        Performance performance = new Performance();
+        performance.kopisId = kopisId;
+        performance.updateFromKopis(title, genre, posterUrl, venueName, startDate, endDate);
+        return performance;
+    }
+
+    public void updateFromKopis(String title, String genre, String posterUrl,
+                                String venueName, LocalDate startDate, LocalDate endDate) {
+        this.title = title;
+        this.genre = genre;
+        this.posterUrl = posterUrl;
+        this.venueName = venueName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
 }

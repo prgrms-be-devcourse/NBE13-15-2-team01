@@ -49,6 +49,8 @@ public class SecurityConfig {
                                 "/api/v1/performances",
                                 "/api/v1/performances/{performanceId}/schedules")
                         .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/kopis/**")
+                        .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/members/me")
                         .authenticated()
                         .requestMatchers("/api/v1/reservations/**")

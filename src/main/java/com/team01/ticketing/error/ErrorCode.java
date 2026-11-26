@@ -28,7 +28,8 @@ public enum ErrorCode {
     SEAT_ALREADY_RESERVED(HttpStatus.CONFLICT, "이미 예매된 좌석입니다."),
     RESERVATION_ALREADY_CANCELED(HttpStatus.CONFLICT, "이미 취소된 예매입니다."),
     CANCEL_NOT_ALLOWED(HttpStatus.CONFLICT, "취소할 수 없는 시간입니다."),
-    TICKET_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "한 회차당 최대 3매까지 예매할 수 있습니다.");
+    TICKET_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "한 회차당 최대 3매까지 예매할 수 있습니다."),
+    KOPIS_API_FAILED(HttpStatus.BAD_GATEWAY, "KOPIS 데이터를 가져오지 못했습니다.");
 
     private final HttpStatus status;
     private final String message;

@@ -3,6 +3,7 @@ package com.team01.ticketing.member.service;
 import com.team01.ticketing.error.BusinessException;
 import com.team01.ticketing.error.ErrorCode;
 import com.team01.ticketing.member.dto.MemberResponse;
+import com.team01.ticketing.member.dto.MemberUpdateRequest;
 import com.team01.ticketing.member.dto.SignupRequest;
 import com.team01.ticketing.member.entity.Member;
 import com.team01.ticketing.member.repository.MemberRepository;
@@ -12,7 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// 회원 자원(가입, 조회, 탈퇴)을 담당.
+// 회원 자원(가입, 조회, 수정)을 담당.
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -44,6 +45,14 @@ public class MemberService {
     public MemberResponse getMe(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        return MemberResponse.from(member);
+    }
+
+    @Transactional
+    public MemberResponse updateMe(Long memberId, MemberUpdateRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        member.changeName(request.name());
         return MemberResponse.from(member);
     }
 }

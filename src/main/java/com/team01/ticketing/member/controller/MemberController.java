@@ -3,6 +3,7 @@ package com.team01.ticketing.member.controller;
 import com.team01.ticketing.error.BusinessException;
 import com.team01.ticketing.error.ErrorCode;
 import com.team01.ticketing.member.dto.MemberResponse;
+import com.team01.ticketing.member.dto.MemberUpdateRequest;
 import com.team01.ticketing.member.dto.SignupRequest;
 import com.team01.ticketing.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,5 +38,15 @@ public class MemberController {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
         return memberService.getMe(memberId);
+    }
+
+    @PutMapping("/me")
+    @Operation(summary = "내 정보 수정")
+    public MemberResponse updateMe(@AuthenticationPrincipal Long memberId,
+                                   @Valid @RequestBody MemberUpdateRequest request) {
+        if (memberId == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return memberService.updateMe(memberId, request);
     }
 }

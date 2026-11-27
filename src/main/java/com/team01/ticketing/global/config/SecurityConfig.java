@@ -31,7 +31,7 @@ public class SecurityConfig {
             HttpSecurity http,
             ApiAuthenticationEntryPoint entryPoint,
             ApiAccessDeniedHandler accessDeniedHandler,
-            JwtService jwtService) throws Exception {
+            JwtService jwtService) {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -49,9 +49,11 @@ public class SecurityConfig {
                                 "/api/v1/performances",
                                 "/api/v1/performances/{performanceId}/schedules")
                         .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/performances/{performanceId}")
+                        .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/kopis/**")
                         .hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/members/me")
+                        .requestMatchers("/api/v1/members/me")
                         .authenticated()
                         .requestMatchers("/api/v1/reservations/**")
                         .authenticated()

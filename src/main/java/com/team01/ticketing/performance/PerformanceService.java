@@ -3,7 +3,9 @@ package com.team01.ticketing.performance;
 import com.team01.ticketing.error.BusinessException;
 import com.team01.ticketing.error.ErrorCode;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PerformanceService {
@@ -30,5 +32,16 @@ public class PerformanceService {
         }
 
         return performanceRepository.save(performance);
+    }
+
+    @Transactional
+    public void deletePerformance(Long performanceId) {
+        try {
+            if (performanceRepository.deletePerformance(performanceId) == 0) {
+                throw new BusinessException(ErrorCode.PERFORMANCE_NOT_FOUND);
+            }
+        } catch (DataIntegrityViolationException ex) {
+            throw new BusinessException(ErrorCode.PERFORMANCE_HAS_SCHEDULES);
+        }
     }
 }

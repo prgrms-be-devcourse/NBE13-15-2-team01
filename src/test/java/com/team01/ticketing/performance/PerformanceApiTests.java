@@ -10,6 +10,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -55,6 +56,31 @@ class PerformanceApiTests {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.title").value("Test performance"));
         mvc.perform(get("/api/v1/performances/999999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deletesPerformanceWithoutSchedules() throws Exception {
+        mvc.perform(delete("/api/v1/performances/102")).andExpect(status().isNoContent());
+        mvc.perform(get("/api/v1/performances/102")).andExpect(status().isNotFound());
+        mvc.perform(delete("/api/v1/performances/102")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void blocksDeletionWhenPerformanceHasSchedules() throws Exception {
+        mvc.perform(delete("/api/v1/performances/101"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("PERFORMANCE_HAS_SCHEDULES"));
+        mvc.perform(get("/api/v1/performances/101/schedules"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void refusesDeletionForRegularMembers() throws Exception {
+        mvc.perform(delete("/api/v1/performances/102")).andExpect(status().isForbidden());
     }
 
     @Test

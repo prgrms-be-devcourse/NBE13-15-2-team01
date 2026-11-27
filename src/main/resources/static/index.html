@@ -8,7 +8,6 @@
   <title>자리있죠? · 공연 찾기</title>
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="app.js"></script>
-  <script type="module" src="auth.js"></script>
 </head>
 <body id="top">
   <header class="site-header">
@@ -17,8 +16,11 @@
       <nav class="site-nav" aria-label="주 메뉴">
         <a class="nav-link" href="#performances">공연 둘러보기</a>
         <button class="button auth-button" id="open-login" type="button" hidden>로그인</button>
+        <button class="button auth-button" id="open-signup" type="button" hidden>회원가입</button>
         <div class="account" id="account" hidden>
           <span id="account-name"></span>
+          <button class="button auth-button" id="open-profile" type="button">내 정보</button>
+          <button class="button auth-button" id="open-performance-form" type="button" hidden>공연 등록</button>
           <button class="button auth-button" id="logout" type="button">로그아웃</button>
         </div>
       </nav>
@@ -42,7 +44,7 @@
 
     <section class="catalog shell" id="performances" aria-labelledby="catalog-heading">
       <div class="mode-banner" id="preview-banner" hidden>
-        <span>샘플 화면을 보고 있습니다.</span><a href="./#performances">실제 공연 목록으로 <span aria-hidden="true">→</span></a>
+        <span>샘플 화면을 보고 있습니다.</span><a href="index.html#performances">실제 공연 목록으로 <span aria-hidden="true">→</span></a>
       </div>
       <div class="catalog-heading">
         <h2 id="catalog-heading">공연 둘러보기</h2>
@@ -55,6 +57,7 @@
         <div id="filters" class="filters" role="group" aria-label="장르 필터"></div>
         <p id="results-count" class="results-count" role="status"></p>
       </div>
+      <p class="catalog-feedback auth-notice" id="catalog-feedback" role="status"></p>
       <div id="catalog-status"></div>
       <div class="card-grid" id="cards"></div>
     </section>
@@ -73,6 +76,7 @@
       <form method="dialog"><button class="close-button" id="close-login" type="submit" aria-label="로그인 창 닫기">×</button></form>
     </div>
     <form class="dialog-body login-form" id="login-form" method="post" action="/api/v1/auth/login">
+      <p class="auth-notice" id="login-notice" role="status"></p>
       <label for="login-email">이메일</label>
       <input id="login-email" name="email" type="email" maxlength="100" autocomplete="username" required autofocus>
       <label for="login-password">비밀번호</label>
@@ -82,16 +86,108 @@
     </form>
   </dialog>
 
+  <dialog class="login-dialog" id="signup-dialog" aria-labelledby="signup-heading">
+    <div class="dialog-header">
+      <h2 id="signup-heading">회원가입</h2>
+      <form method="dialog"><button class="close-button" id="close-signup" type="submit" aria-label="회원가입 창 닫기">×</button></form>
+    </div>
+    <form class="dialog-body login-form" id="signup-form" method="post" action="/api/v1/members">
+      <label for="signup-name">이름</label>
+      <input id="signup-name" name="name" maxlength="50" autocomplete="name" required autofocus>
+      <label for="signup-email">이메일</label>
+      <input id="signup-email" name="email" type="email" maxlength="100" autocomplete="username" required>
+      <label for="signup-password">비밀번호</label>
+      <input id="signup-password" name="password" type="password" minlength="8" maxlength="64" autocomplete="new-password" aria-describedby="signup-password-help" required>
+      <p class="field-help" id="signup-password-help">영문, 숫자, 특수문자를 사용할 수 있습니다. 8~64자</p>
+      <p class="login-error" id="signup-error" role="alert"></p>
+      <button class="button button-primary" id="submit-signup" type="submit">가입하기</button>
+    </form>
+  </dialog>
+
+  <dialog class="login-dialog" id="profile-dialog" aria-labelledby="profile-heading">
+    <div class="dialog-header">
+      <h2 id="profile-heading">내 정보</h2>
+      <form method="dialog"><button class="close-button" type="submit" aria-label="내 정보 창 닫기" autofocus>×</button></form>
+    </div>
+    <div class="dialog-body">
+      <p id="profile-status" class="field-help" role="status"></p>
+      <dl class="profile-fields" id="profile-fields" hidden>
+        <dt>이름</dt><dd id="profile-name"></dd>
+        <dt>이메일</dt><dd id="profile-email"></dd>
+        <dt>권한</dt><dd id="profile-role"></dd>
+      </dl>
+    </div>
+  </dialog>
+
+  <dialog class="login-dialog" id="performance-form-dialog" aria-labelledby="performance-form-heading">
+    <div class="dialog-header">
+      <h2 id="performance-form-heading">공연 등록</h2>
+      <form method="dialog"><button class="close-button" id="close-performance-form" type="submit" aria-label="공연 등록 창 닫기">×</button></form>
+    </div>
+    <form class="dialog-body login-form" id="performance-form" method="post" action="/api/v1/performances">
+      <label for="performance-title">공연명 (필수)</label>
+      <input id="performance-title" name="title" maxlength="200" required autofocus>
+      <label for="performance-genre">장르</label>
+      <input id="performance-genre" name="genre" maxlength="50">
+      <label for="performance-venue">공연장</label>
+      <input id="performance-venue" name="venueName" maxlength="200">
+      <div class="performance-dates">
+        <div>
+          <label for="performance-start-date">시작일</label>
+          <input id="performance-start-date" name="startDate" type="date">
+        </div>
+        <div>
+          <label for="performance-end-date">종료일</label>
+          <input id="performance-end-date" name="endDate" type="date">
+        </div>
+      </div>
+      <label for="performance-poster">포스터 URL</label>
+      <input id="performance-poster" name="posterUrl" type="url" maxlength="500" placeholder="https://">
+      <p class="login-error" id="performance-form-error" role="alert"></p>
+      <button class="button button-primary" id="submit-performance" type="submit">등록하기</button>
+    </form>
+  </dialog>
+
   <dialog id="detail" aria-labelledby="detail-heading">
     <div class="dialog-header">
       <p>공연 상세</p>
-      <form method="dialog"><button class="close-button" type="submit" aria-label="상세 닫기" autofocus>×</button></form>
+      <form method="dialog"><button class="close-button" id="close-detail" type="submit" aria-label="상세 닫기" autofocus>×</button></form>
     </div>
     <div class="dialog-body">
       <h2 class="sr-only" id="detail-heading">공연 상세</h2>
       <div id="detail-summary"></div>
+      <section class="detail-section performance-admin" id="performance-admin" aria-label="공연 관리" hidden>
+        <button class="button danger-button" id="open-delete-performance" type="button">공연 삭제</button>
+        <form id="delete-performance-form" hidden>
+          <p id="delete-performance-confirmation"></p>
+          <p class="login-error" id="delete-performance-error" role="alert"></p>
+          <div class="delete-actions">
+            <button class="button" id="cancel-delete-performance" type="button">취소</button>
+            <button class="button danger-submit" id="submit-delete-performance" type="submit">삭제하기</button>
+          </div>
+        </form>
+      </section>
       <section id="schedule-section" class="detail-section" aria-labelledby="schedule-heading" hidden>
-        <h3 id="schedule-heading">공연 회차</h3>
+        <div class="section-heading">
+          <h3 id="schedule-heading">공연 회차</h3>
+          <button class="button" id="open-schedule-form" type="button" hidden>회차 등록</button>
+        </div>
+        <form class="login-form schedule-form" id="schedule-form" method="post" hidden>
+          <label for="schedule-start-at">공연 시작 일시 (한국 시간)</label>
+          <input id="schedule-start-at" name="startAt" type="datetime-local" required>
+          <label for="schedule-status">회차 상태</label>
+          <select id="schedule-status" name="status">
+            <option value="CLOSED">마감</option>
+            <option value="OPEN">열림</option>
+          </select>
+          <p class="field-help">회차를 등록해도 좌석은 자동으로 추가되지 않습니다.</p>
+          <p class="login-error" id="schedule-form-error" role="alert"></p>
+          <div class="delete-actions">
+            <button class="button" id="cancel-schedule-form" type="button">취소</button>
+            <button class="button button-primary" id="submit-schedule" type="submit">등록하기</button>
+          </div>
+        </form>
+        <p class="auth-notice" id="schedule-feedback" role="status"></p>
         <div id="schedules"></div>
       </section>
       <section id="seat-section" class="detail-section" aria-labelledby="seat-heading" hidden>

@@ -1,4 +1,5 @@
 import { requestApi } from './api.js';
+import { isAdmin } from './auth.js';
 
 const preview = new URLSearchParams(location.search).get('preview') === '1';
 const byId = (id) => document.getElementById(id);
@@ -13,6 +14,21 @@ const scheduleSection = byId('schedule-section');
 const schedules = byId('schedules');
 const seatSection = byId('seat-section');
 const seats = byId('seats');
+const closeDetail = byId('close-detail');
+const adminActions = byId('performance-admin');
+const openDelete = byId('open-delete-performance');
+const deleteForm = byId('delete-performance-form');
+const deletePrompt = byId('delete-performance-confirmation');
+const deleteError = byId('delete-performance-error');
+const cancelDelete = byId('cancel-delete-performance');
+const submitDelete = byId('submit-delete-performance');
+const openScheduleForm = byId('open-schedule-form');
+const scheduleForm = byId('schedule-form');
+const scheduleDate = byId('schedule-start-at');
+const scheduleError = byId('schedule-form-error');
+const scheduleFeedback = byId('schedule-feedback');
+const cancelSchedule = byId('cancel-schedule-form');
+const submitSchedule = byId('submit-schedule');
 
 const covers = new Map([
   ['뮤지컬', 'images/musical.jpg'],
@@ -31,6 +47,9 @@ let performances = [];
 let activeGenre;
 let detailRequest;
 let seatRequest;
+let catalogRequest;
+let scheduleRequest;
+let activePerformance;
 
 function element(tag, className, content) {
   const node = document.createElement(tag);
@@ -141,13 +160,14 @@ function applyGenre(genre) {
 
 function renderFilters() {
   const genres = new Set(performances.map(genreOf));
+  if (!genres.has(activeGenre)) activeGenre = undefined;
   const allButton = button('filter', '전체', () => applyGenre(undefined));
-  allButton.setAttribute('aria-pressed', 'true');
+  allButton.setAttribute('aria-pressed', String(activeGenre === undefined));
   filters.replaceChildren(allButton);
   for (const genre of genres) {
     const filter = button('filter', genre, () => applyGenre(genre));
     filter.dataset.genre = genre;
-    filter.setAttribute('aria-pressed', 'false');
+    filter.setAttribute('aria-pressed', String(genre === activeGenre));
     filters.append(filter);
   }
 }
@@ -183,13 +203,19 @@ function renderCards() {
 }
 
 async function loadCatalog() {
+  catalogRequest?.abort();
+  catalogRequest = new AbortController();
+  const { signal } = catalogRequest;
   showStatus(catalogStatus, '공연을 불러오는 중입니다.');
   try {
-    performances = await getData('performances');
+    const list = await getData('performances', signal);
+    if (signal.aborted) return;
+    performances = list;
     search.disabled = !performances.length;
     renderFilters();
     renderCards();
   } catch (error) {
+    if (signal.aborted) return;
     showStatus(catalogStatus, error.message || '공연 목록을 불러올 수 없습니다.', [
       button('button', '다시 시도', loadCatalog),
       previewLink(),
@@ -223,6 +249,10 @@ async function openPerformance(performance) {
   seatRequest?.abort();
   detailRequest = new AbortController();
   const { signal } = detailRequest;
+  activePerformance = undefined;
+  resetDeleteForm();
+  resetScheduleForm();
+  scheduleFeedback.textContent = '';
   seatSection.hidden = true;
   seats.replaceChildren();
   scheduleSection.hidden = true;
@@ -233,6 +263,8 @@ async function openPerformance(performance) {
   try {
     const detail = await getData(`performances/${performance.id}`, signal);
     if (signal.aborted) return;
+    activePerformance = detail;
+    updateAdminActions();
     renderSummary(detail);
     loadSchedules(detail.id, signal);
   } catch (error) {
@@ -243,7 +275,10 @@ async function openPerformance(performance) {
   }
 }
 
-async function loadSchedules(performanceId, signal) {
+async function loadSchedules(performanceId, detailSignal) {
+  scheduleRequest?.abort();
+  scheduleRequest = new AbortController();
+  const signal = AbortSignal.any([detailSignal, scheduleRequest.signal]);
   scheduleSection.hidden = false;
   showStatus(schedules, '회차를 불러오는 중입니다.');
   try {
@@ -268,7 +303,7 @@ async function loadSchedules(performanceId, signal) {
   } catch (error) {
     if (signal.aborted) return;
     showStatus(schedules, error.message || '회차를 불러올 수 없습니다.', [
-      button('button', '다시 시도', () => loadSchedules(performanceId, signal)),
+      button('button', '다시 시도', () => loadSchedules(performanceId, detailSignal)),
     ]);
   }
 }
@@ -348,11 +383,118 @@ async function loadSeats(schedule) {
   }
 }
 
+function updateAdminActions() {
+  const canManage = !preview && Boolean(activePerformance) && isAdmin();
+  adminActions.hidden = !canManage;
+  openScheduleForm.hidden = !canManage || !scheduleForm.hidden;
+  if (!canManage) scheduleForm.hidden = true;
+}
+
+function resetDeleteForm() {
+  deleteForm.hidden = true;
+  openDelete.hidden = false;
+  deleteError.textContent = '';
+}
+
+openDelete.addEventListener('click', () => {
+  resetScheduleForm();
+  deletePrompt.textContent = `‘${activePerformance.title}’ 공연을 삭제할까요? 삭제한 공연은 복구할 수 없습니다.`;
+  openDelete.hidden = true;
+  deleteForm.hidden = false;
+  cancelDelete.focus();
+});
+
+cancelDelete.addEventListener('click', () => {
+  resetDeleteForm();
+  openDelete.focus();
+});
+
+deleteForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (submitDelete.disabled || submitSchedule.disabled || !activePerformance || !isAdmin()) return;
+  const { id, title } = activePerformance;
+  deleteError.textContent = '';
+  submitDelete.disabled = cancelDelete.disabled = closeDetail.disabled = openScheduleForm.disabled = true;
+  try {
+    await requestApi(`performances/${id}`, { method: 'DELETE', authenticated: true });
+    dialog.close();
+    byId('catalog-feedback').textContent = `‘${title}’ 공연을 삭제했습니다.`;
+    loadCatalog();
+  } catch (error) {
+    deleteError.textContent = error.status === 401
+      ? '로그인 시간이 만료됐습니다. 다시 로그인해 주세요.'
+      : error.message || '공연을 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+  } finally {
+    submitDelete.disabled = cancelDelete.disabled = closeDetail.disabled = openScheduleForm.disabled = false;
+  }
+});
+
+function resetScheduleForm() {
+  scheduleForm.reset();
+  scheduleForm.hidden = true;
+  scheduleError.textContent = '';
+  updateAdminActions();
+}
+
+openScheduleForm.addEventListener('click', () => {
+  resetDeleteForm();
+  scheduleFeedback.textContent = '';
+  scheduleForm.hidden = false;
+  updateAdminActions();
+  scheduleDate.focus();
+});
+
+cancelSchedule.addEventListener('click', () => {
+  resetScheduleForm();
+  openScheduleForm.focus();
+});
+
+scheduleForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (submitSchedule.disabled || submitDelete.disabled || !activePerformance || !isAdmin()) return;
+
+  const { id } = activePerformance;
+  const { startAt, status } = Object.fromEntries(new FormData(scheduleForm));
+  scheduleError.textContent = '';
+  submitSchedule.disabled = cancelSchedule.disabled = closeDetail.disabled = openDelete.disabled = true;
+  try {
+    const saved = await requestApi(`performances/${id}/schedules`, {
+      method: 'POST',
+      authenticated: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ startAt, status }),
+    });
+    resetScheduleForm();
+    openScheduleForm.focus();
+    scheduleFeedback.textContent = `${scheduleTime(saved.startAt)} 회차를 등록했습니다.`;
+    seatRequest?.abort();
+    seatSection.hidden = true;
+    loadSchedules(id, detailRequest.signal);
+  } catch (error) {
+    scheduleError.textContent = error.status === 401
+      ? '로그인 시간이 만료됐습니다. 다시 로그인해 주세요.'
+      : error.message || '회차를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+  } finally {
+    submitSchedule.disabled = cancelSchedule.disabled = closeDetail.disabled = openDelete.disabled = false;
+  }
+});
+
+dialog.addEventListener('cancel', (event) => {
+  if (submitDelete.disabled || submitSchedule.disabled) event.preventDefault();
+});
 dialog.addEventListener('close', () => {
   if (dialog.open) return;
   detailRequest?.abort();
   seatRequest?.abort();
 });
+document.addEventListener('account-changed', updateAdminActions);
 search.addEventListener('input', renderCards);
+document.addEventListener('performance-registered', ({ detail: performance }) => {
+  search.value = '';
+  activeGenre = undefined;
+  byId('catalog-feedback').textContent = `‘${performance.title}’ 공연을 등록했습니다.`;
+  byId('performances').scrollIntoView();
+  loadCatalog();
+});
 byId('preview-banner').hidden = !preview;
 loadCatalog();

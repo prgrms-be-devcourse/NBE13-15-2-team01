@@ -24,6 +24,7 @@ public enum ErrorCode {
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "예매를 찾을 수 없습니다."),
 
     EMAIL_DUPLICATED(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
+    PERFORMANCE_HAS_SCHEDULES(HttpStatus.CONFLICT, "등록된 회차가 있는 공연은 삭제할 수 없습니다."),
     SCHEDULE_NOT_BOOKABLE(HttpStatus.CONFLICT, "예매할 수 없는 회차입니다."),
     SEAT_ALREADY_RESERVED(HttpStatus.CONFLICT, "이미 예매된 좌석입니다."),
     RESERVATION_ALREADY_CANCELED(HttpStatus.CONFLICT, "이미 취소된 예매입니다."),

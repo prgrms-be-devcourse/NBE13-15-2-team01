@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="공연을 찾고 날짜별 회차와 좌석 현황을 확인하세요.">
+  <meta name="theme-color" content="#ffffff">
+  <title>자리있죠? · 공연 찾기</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+  <script type="module" src="auth.js"></script>
+</head>
+<body id="top">
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#top" aria-label="자리있죠? 홈"><span class="brand-icon" aria-hidden="true"></span>자리있죠?</a>
+      <nav class="site-nav" aria-label="주 메뉴">
+        <a class="nav-link" href="#performances">공연 둘러보기</a>
+        <button class="button auth-button" id="open-login" type="button" hidden>로그인</button>
+        <div class="account" id="account" hidden>
+          <span id="account-name"></span>
+          <button class="button auth-button" id="logout" type="button">로그아웃</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero shell" aria-labelledby="hero-heading">
+      <div class="hero-content">
+        <h1 id="hero-heading">보고 싶은 공연,<br><em>자리 있나요?</em></h1>
+        <p class="hero-description">뮤지컬부터 콘서트까지, 원하는 공연의 회차와 좌석을 한눈에 확인하세요.</p>
+        <a class="button button-primary" href="#performances">공연 찾아보기 <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="ticket">
+          <div class="ticket-photo"></div>
+          <div class="ticket-stub"><span class="ticket-barcode"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="catalog shell" id="performances" aria-labelledby="catalog-heading">
+      <div class="mode-banner" id="preview-banner" hidden>
+        <span>샘플 화면을 보고 있습니다.</span><a href="./#performances">실제 공연 목록으로 <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="catalog-heading">
+        <h2 id="catalog-heading">공연 둘러보기</h2>
+        <label class="search">
+          <span class="search-icon" aria-hidden="true"></span>
+          <input id="search" type="search" aria-label="공연명 또는 공연장으로 검색" placeholder="공연명 또는 공연장 검색" disabled>
+        </label>
+      </div>
+      <div class="catalog-tools">
+        <div id="filters" class="filters" role="group" aria-label="장르 필터"></div>
+        <p id="results-count" class="results-count" role="status"></p>
+      </div>
+      <div id="catalog-status"></div>
+      <div class="card-grid" id="cards"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <a class="brand" href="#top"><span class="brand-icon" aria-hidden="true"></span>자리있죠?</a>
+      <a class="top-link" href="#top">맨 위로 <span aria-hidden="true">↑</span></a>
+    </div>
+  </footer>
+
+  <dialog class="login-dialog" id="login-dialog" aria-labelledby="login-heading">
+    <div class="dialog-header">
+      <h2 id="login-heading">로그인</h2>
+      <form method="dialog"><button class="close-button" id="close-login" type="submit" aria-label="로그인 창 닫기">×</button></form>
+    </div>
+    <form class="dialog-body login-form" id="login-form" method="post" action="/api/v1/auth/login">
+      <label for="login-email">이메일</label>
+      <input id="login-email" name="email" type="email" maxlength="100" autocomplete="username" required autofocus>
+      <label for="login-password">비밀번호</label>
+      <input id="login-password" name="password" type="password" maxlength="64" autocomplete="current-password" required>
+      <p class="login-error" id="login-error" role="alert"></p>
+      <button class="button button-primary" id="submit-login" type="submit">로그인</button>
+    </form>
+  </dialog>
+
+  <dialog id="detail" aria-labelledby="detail-heading">
+    <div class="dialog-header">
+      <p>공연 상세</p>
+      <form method="dialog"><button class="close-button" type="submit" aria-label="상세 닫기" autofocus>×</button></form>
+    </div>
+    <div class="dialog-body">
+      <h2 class="sr-only" id="detail-heading">공연 상세</h2>
+      <div id="detail-summary"></div>
+      <section id="schedule-section" class="detail-section" aria-labelledby="schedule-heading" hidden>
+        <h3 id="schedule-heading">공연 회차</h3>
+        <div id="schedules"></div>
+      </section>
+      <section id="seat-section" class="detail-section" aria-labelledby="seat-heading" hidden>
+        <h3 id="seat-heading">좌석 현황</h3>
+        <div id="seats"></div>
+      </section>
+    </div>
+  </dialog>
+</body>
+</html>

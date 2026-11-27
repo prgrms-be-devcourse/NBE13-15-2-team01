@@ -15,5 +15,4 @@ public record ReservationCreateRequest(
 
         @NotEmpty(message = "좌석을 선택해 주세요.")
         @Size(max = ReservationPolicy.MAX_SEATS_PER_SCHEDULE, message = "한 번에 최대 {max}석까지 선택할 수 있습니다.")
-        List<@NotNull @Positive Long> seatIds) {
-}
+        List<@NotNull @Positive Long> seatIds) {}

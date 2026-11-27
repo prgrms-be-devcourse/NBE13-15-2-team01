@@ -51,7 +51,7 @@ public class ReservationService {
         return ReservationResponse.of(reservation, seats);
     }
 
-    // 같은 좌석 중복 선택 → DB 가기 전에 거름
+    // 한번의 예매 시도에서 같은 좌석 중복 선택 → DB 가기 전에 거름
     private void validateNoDuplicateSeats(List<Long> seatIds) {
         if (new HashSet<>(seatIds).size() != seatIds.size()) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR);
